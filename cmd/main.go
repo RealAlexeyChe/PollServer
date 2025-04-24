@@ -5,6 +5,8 @@ package main
 import (
 	. "LesyaBack/admin/login"
 	. "LesyaBack/admin/poll"
+	"LesyaBack/poll/model"
+	"LesyaBack/utils"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"log"
@@ -24,6 +26,7 @@ func infoHandler(rw http.ResponseWriter, req *http.Request) {
 }
 
 func run() error {
+
 	r := chi.NewRouter()
 
 	r.Get("/info", infoHandler)
@@ -36,6 +39,21 @@ func run() error {
 
 	r.Get("/admin/poll/*", HandleGetPoll)
 	fmt.Println("Сервер запущен на 3000")
+
+	fmt.Println("Образцы вопросов:")
+
+	fmt.Println("Выбор одного из ответов:")
+	utils.LogJsonLight(model.SelectExample)
+	fmt.Println("Выбор нескольких ответов:")
+
+	utils.LogJsonLight(model.MultiSelectExample)
+	fmt.Println("Выбор оценки:")
+
+	utils.LogJsonLight(model.GradeExample)
+	fmt.Println("Текстовая форма:")
+
+	utils.LogJsonLight(model.TextExample)
+
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
 		log.Fatal("Не могу запустить сервер: ", err)
