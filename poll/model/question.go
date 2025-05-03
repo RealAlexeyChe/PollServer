@@ -1,10 +1,11 @@
 package model
 
 type Question struct {
-	Text     string       `json:"text"`
-	Type     QuestionType `json:"type"`
-	Options  []string     `json:"options,omitempty"`
-	MaxGrade int          `json:"maxGrade,omitempty"`
+	IsRequired bool
+	Text       string       `json:"text"`
+	Type       QuestionType `json:"type"`
+	Rows       []string     `json:"grid,omitempty"`
+	Options    []string     `json:"options,omitempty"`
 }
 
 type QuestionType string
@@ -12,8 +13,8 @@ type QuestionType string
 const (
 	Select      = "select"
 	MultiSelect = "multiselect"
-	Grade       = "grade"
 	Text        = "text"
+	Grid        = "grid"
 )
 
 var SelectExample Question = Question{
@@ -36,13 +37,22 @@ var MultiSelectExample Question = Question{
 	},
 }
 
-var GradeExample Question = Question{
-	Text:     "Дай оценку",
-	Type:     Grade, // = "grade"
-	MaxGrade: 10,
-}
-
 var TextExample Question = Question{
 	Text: "Опиши свой день",
 	Type: Text, // = "text"
+}
+
+var GridExample Question = Question{
+	Text: "Оцени машины",
+	Type: Grid, // = "gid"
+	Options: []string{
+		"Плохо",
+		"Средне",
+		"Хорошо",
+	},
+	Rows: []string{
+		"Lexus RX",
+		"Lada Grata",
+		"Ford F-150",
+	},
 }

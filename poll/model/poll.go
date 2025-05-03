@@ -5,6 +5,7 @@ type CreatePollRequest struct {
 	Group     string `json:"group"`
 	Professor string `json:"professor"`
 	Deadline  int64  `json:"deadline,omitempty"`
+	Template  bool   `json:"template"`
 }
 
 type Poll struct {

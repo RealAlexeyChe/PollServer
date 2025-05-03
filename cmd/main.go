@@ -47,12 +47,14 @@ func run() error {
 	fmt.Println("Выбор нескольких ответов:")
 
 	utils.LogJsonLight(model.MultiSelectExample)
-	fmt.Println("Выбор оценки:")
 
-	utils.LogJsonLight(model.GradeExample)
 	fmt.Println("Текстовая форма:")
 
 	utils.LogJsonLight(model.TextExample)
+
+	fmt.Println("Сетка вопросов:")
+
+	utils.LogJsonLight(model.GridExample)
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {
