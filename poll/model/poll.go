@@ -12,5 +12,5 @@ type Poll struct {
 }
 
 type Link struct {
-	Link string `bson:"_id"`
+	Link string `json:"link" bson:"_id"`
 }

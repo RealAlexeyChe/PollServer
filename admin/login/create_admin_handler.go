@@ -16,7 +16,7 @@ func CreateAdminHandler(rw http.ResponseWriter, req *http.Request) {
 	var a model.AdminRequest
 
 	err := json.NewDecoder(req.Body).Decode(&a)
-	LogJsonRecieved(req.Body)
+	LogJsonRecieved(a)
 
 	if err != nil {
 		fmt.Println("Неправильный запрос")
