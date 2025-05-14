@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"LesyaBack/poll/model"
 	"encoding/json"
 	"fmt"
 	"github.com/TylerBrock/colorjson"
@@ -43,4 +44,12 @@ func LogJsonSent(o any) {
 	s, _ := f.Marshal(obj)
 	fmt.Println("Отправлен JSON: ")
 	fmt.Println(string(s))
+}
+
+func ReportAnswerTypeMistach(a model.Answer, q model.Question) {
+	fmt.Println("Не заполнен нужный тип ответа:")
+	fmt.Println("Вопрос: ", q.Text)
+	fmt.Println("Тип вопроса: ", q.Type)
+	fmt.Println("Ответ: ")
+	LogJsonLight(a)
 }

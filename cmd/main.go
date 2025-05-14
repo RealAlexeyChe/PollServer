@@ -6,6 +6,7 @@ import (
 	. "LesyaBack/admin/login"
 	. "LesyaBack/admin/poll"
 	"LesyaBack/poll/model"
+	. "LesyaBack/user"
 	"LesyaBack/utils"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -24,17 +25,28 @@ func infoHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.Write([]byte("LETI Polls API"))
 
 }
-
+func pathHandler(rw http.ResponseWriter, req *http.Request) {
+	p := req.URL
+	m := req.Method
+	fmt.Println("Запрос " + m + " на " + p.Path)
+	rw.Write([]byte("LETI Polls API"))
+	fmt.Println("Ручка не найдена")
+}
 func run() error {
 
 	r := chi.NewRouter()
+	// ОТВЕТЫ
+	r.HandleFunc("/*", pathHandler)
+	r.Post("/answers", HandleCreateAnswers)
+	// ОПРОСЫ
 
 	r.Get("/info", infoHandler)
-	r.Post("/admin/login", LoginHandler)
+	r.Get("/admin/create", CreateAdminHandler)
+	r.Get("/admin/login", LoginHandler)
 
 	r.Get("/admin/poll", HandleGetAllPolls)
 	r.Post("/admin/poll", HandleCreatePoll)
-	r.Put("/admin/poll", HandleUpdatePoll)
+	r.Put("/admin/poll/*", HandleUpdatePoll)
 	r.Delete("/admin/poll/*", HandleDeletePoll)
 
 	r.Get("/admin/poll/*", HandleGetPoll)

@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-var col *mongo.Collection
+var PollCol *mongo.Collection
 
 func init() {
 	c, err := mongo.Connect(options.Client().ApplyURI("mongodb://127.0.0.1:27017"))
@@ -28,31 +28,53 @@ func init() {
 	if db.Collection("Polls") == nil {
 		db.CreateCollection(context.TODO(), "Polls")
 	}
-	col = db.Collection("Polls")
+	PollCol = db.Collection("Polls")
+
+	if db.Collection("Admins") == nil {
+		db.CreateCollection(context.TODO(), "Admins")
+	}
+	adminCol = db.Collection("Admins")
+
+	if db.Collection("Answers") == nil {
+		db.CreateCollection(context.TODO(), "Answers")
+	}
+	answersCol = db.Collection("Answers")
 
 }
 
-func GetAllPolls() ([]Poll, error) {
-	c, err := col.Find(context.TODO(), bson.M{})
+func GetAllPolls(sessionId string) ([]Link, error) {
+
+	filter := bson.D{{"sessionid", sessionId}}
+
+	pipeline := mongo.Pipeline{
+		{{"$match", filter}},
+		{{"$group", bson.D{
+			{"_id", "$link"},
+		}}},
+	}
+
+	c, err := PollCol.Aggregate(context.TODO(), pipeline)
 	if err != nil {
 		return nil, err
 	}
-	var ps []Poll
-	err = c.All(context.TODO(), &ps)
+
+	l := []Link{}
+
+	err = c.All(context.TODO(), &l)
 	if err != nil {
 		return nil, err
 	}
-	return ps, nil
+
+	return l, nil
 }
 
-func CreateNewPoll(c *CreatePollRequest) (*string, error) {
+func CreateNewPoll(c *CreatePollRequest, sessionId string) (*Poll, error) {
 	p := Poll{}
+
 	if c.Template {
 		p = Poll{
+			SessionId: sessionId,
 			Link:      uuid.New().String(),
-			Course:    c.Course,
-			Group:     c.Group,
-			Professor: c.Professor,
 			Questions: []Question{
 				{
 					IsRequired: true,
@@ -204,20 +226,24 @@ func CreateNewPoll(c *CreatePollRequest) (*string, error) {
 			},
 		}
 	} else {
-		p = Poll{}
+		p = Poll{
+			SessionId: sessionId,
+			Link:      uuid.New().String(),
+			Questions: make([]Question, 0),
+		}
 	}
 
-	_, err := col.InsertOne(context.TODO(), p)
+	_, err := PollCol.InsertOne(context.TODO(), p)
 	if err != nil {
 		return nil, err
 	}
-	l := p.Link
-	return &l, nil
+
+	return &p, nil
 }
 
 func GetPoll(l string) (*Poll, error) {
 	var p Poll
-	res := col.FindOne(context.TODO(), &bson.M{
+	res := PollCol.FindOne(context.TODO(), &bson.M{
 		"link": l,
 	})
 	if err := res.Decode(&p); err != nil {
@@ -226,11 +252,18 @@ func GetPoll(l string) (*Poll, error) {
 	return &p, nil
 }
 
-func UpdatePoll(l string, new Poll) (*Poll, error) {
+func UpdatePoll(l string, new Poll, sessionId string) (*Poll, error) {
 
-	_, err := col.UpdateOne(context.TODO(), &bson.M{
-		"link": l,
-	}, new)
+	var p Poll
+	err := PollCol.FindOne(context.TODO(), &bson.M{
+		"link": l, "sessionId": sessionId,
+	}).Decode(&p)
+
+	if p.SessionId != sessionId {
+		return nil, errors.New("Unauthorized")
+	}
+	_, err = PollCol.UpdateOne(context.TODO(), &bson.M{
+		"link": l}, &bson.M{"$set": new})
 
 	if err != nil {
 		return nil, err
@@ -244,17 +277,17 @@ func UpdatePoll(l string, new Poll) (*Poll, error) {
 	return upd, nil
 }
 
-func DeletePoll(l string) error {
+func DeletePoll(l string, sessionId string) error {
 	var p Poll
-	err := col.FindOne(context.TODO(), &bson.M{
-		"link": l,
+	err := PollCol.FindOne(context.TODO(), &bson.M{
+		"link": l, "sessionId": sessionId,
 	}).Decode(&p)
 
 	if err == mongo.ErrNoDocuments {
 		return errors.New("Not found")
 	}
-	_, err = col.DeleteOne(context.TODO(), &bson.M{
-		"link": l,
+	_, err = PollCol.DeleteOne(context.TODO(), &bson.M{
+		"link": l, "sessionId": sessionId,
 	})
 
 	return err

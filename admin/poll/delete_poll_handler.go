@@ -12,7 +12,14 @@ func HandleDeletePoll(rw http.ResponseWriter, req *http.Request) {
 
 	link := strings.Replace(req.URL.Path, "/admin/poll/", "", 1)
 	link = link
-	err := db.DeletePoll(link)
+
+	c, e := req.Cookie("sessionId")
+	if e != nil {
+		rw.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	err := db.DeletePoll(link, c.Value)
 	if err != nil {
 		if err.Error() == "Not found" {
 			fmt.Println("Опрос по ссылке не найден")

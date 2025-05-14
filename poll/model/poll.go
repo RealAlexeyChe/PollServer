@@ -1,18 +1,16 @@
 package model
 
 type CreatePollRequest struct {
-	Course    string `json:"course"`
-	Group     string `json:"group"`
-	Professor string `json:"professor"`
-	Deadline  int64  `json:"deadline,omitempty"`
-	Template  bool   `json:"template"`
+	Template bool `json:"template"`
 }
 
 type Poll struct {
-	Link      string
-	Course    string
-	Group     string
-	Professor string
-	Deadline  int64 `json:"deadline,omitempty"`
-	Questions []Question
+	SessionId string     `json:"-"`
+	Link      string     `json:"link"`
+	Deadline  int        `json:"deadline,omitempty"`
+	Questions []Question `json:"questions"`
+}
+
+type Link struct {
+	Link string `bson:"_id"`
 }

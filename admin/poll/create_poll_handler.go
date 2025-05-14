@@ -20,25 +20,14 @@ func HandleCreatePoll(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	LogJsonRecieved(r)
-	if r.Course == "" || r.Group == "" || r.Professor == "" {
-		fmt.Println("Не заполнена одно из полей")
-	}
-	if r.Course == "" {
-		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("Course must be filled"))
+
+	c, e := req.Cookie("sessionId")
+	if e != nil {
+		rw.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	if r.Group == "" {
-		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("Group must be filled"))
-		return
-	}
-	if r.Professor == "" {
-		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("Professor must be filled"))
-		return
-	}
-	l, e := CreatePoll(&r)
+
+	l, e := CreatePoll(&r, c.Value)
 	if e != nil {
 		fmt.Println("Ошибка создания опроса: ", e)
 
@@ -46,19 +35,21 @@ func HandleCreatePoll(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 	res, e := json.Marshal(l)
-	fmt.Println("Отправлена ссылка на опрос: ", *l)
 	if e != nil {
+		fmt.Println("Ошибка получения ссылки: ", e)
 		rw.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	fmt.Println("Отправлена ссылка на опрос: ", *l)
+
 	rw.Write(res)
 
 }
 
-func CreatePoll(request *CreatePollRequest) (*string, error) {
-	l, err := db.CreateNewPoll(request)
+func CreatePoll(request *CreatePollRequest, sessionId string) (*Poll, error) {
+	p, err := db.CreateNewPoll(request, sessionId)
 	if err != nil {
 		return nil, err
 	}
-	return l, nil
+	return p, nil
 }
