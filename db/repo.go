@@ -264,10 +264,14 @@ func UpdatePoll(l string, new Poll, sessionId string) (*Poll, error) {
 		fmt.Println("Poll with link and session not found")
 		return nil, errors.New("Poll with link and session not found")
 	}
+	err := res.Decode(&p)
+	if err != nil {
+		return nil, err
+	}
 	if p.SessionId != sessionId {
 		return nil, errors.New("Unauthorized")
 	}
-	_, err := PollCol.UpdateOne(context.TODO(), &bson.M{
+	_, err = PollCol.UpdateOne(context.TODO(), &bson.M{
 		"link": l}, &bson.M{"$set": new})
 
 	if err != nil {
