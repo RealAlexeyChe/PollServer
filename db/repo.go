@@ -4,6 +4,7 @@ import (
 	. "LesyaBack/poll/model"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -255,14 +256,18 @@ func GetPoll(l string) (*Poll, error) {
 func UpdatePoll(l string, new Poll, sessionId string) (*Poll, error) {
 
 	var p Poll
-	err := PollCol.FindOne(context.TODO(), &bson.M{
-		"link": l, "sessionId": sessionId,
-	}).Decode(&p)
+	res := PollCol.FindOne(context.TODO(), &bson.M{
+		"link": l, "sessionid": sessionId,
+	})
+	if res.Err() == mongo.ErrNoDocuments {
 
+		fmt.Println("Poll with link and session not found")
+		return nil, errors.New("Poll with link and session not found")
+	}
 	if p.SessionId != sessionId {
 		return nil, errors.New("Unauthorized")
 	}
-	_, err = PollCol.UpdateOne(context.TODO(), &bson.M{
+	_, err := PollCol.UpdateOne(context.TODO(), &bson.M{
 		"link": l}, &bson.M{"$set": new})
 
 	if err != nil {

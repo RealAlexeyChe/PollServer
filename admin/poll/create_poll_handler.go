@@ -42,11 +42,13 @@ func HandleCreatePoll(rw http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Println("Отправлена ссылка на опрос: ", *l)
 
+	LogJsonSent(l)
 	rw.Write(res)
 
 }
 
 func CreatePoll(request *CreatePollRequest, sessionId string) (*Poll, error) {
+
 	p, err := db.CreateNewPoll(request, sessionId)
 	if err != nil {
 		return nil, err

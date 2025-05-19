@@ -12,6 +12,7 @@ import (
 
 func HandleGetAllPolls(rw http.ResponseWriter, req *http.Request) {
 	fmt.Println("Запрос GET на /admin/poll")
+	LogJsonRecieved(req.Body)
 
 	var links []model.Link
 
@@ -45,7 +46,7 @@ func HandleGetPoll(rw http.ResponseWriter, req *http.Request) {
 	link := strings.Replace(req.URL.Path, "/admin/poll/", "", 1)
 
 	fmt.Println("Запрос GET на /admin/poll/", link)
-
+	LogJsonRecieved(req.Body)
 	res, err := db.GetPoll(link)
 	if err != nil {
 		fmt.Println("Опрос не найден")

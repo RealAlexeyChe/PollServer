@@ -7,7 +7,7 @@ import (
 	. "LesyaBack/admin/poll"
 	"LesyaBack/poll/model"
 	. "LesyaBack/user"
-	"LesyaBack/utils"
+	. "LesyaBack/utils"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"log"
@@ -29,23 +29,25 @@ func pathHandler(rw http.ResponseWriter, req *http.Request) {
 	p := req.URL
 	m := req.Method
 	fmt.Println("Запрос " + m + " на " + p.Path)
-	rw.Write([]byte("LETI Polls API"))
+	LogJsonRecieved(req.Body)
 	fmt.Println("Ручка не найдена")
+
+	http.Error(rw, "Путь не существует", http.StatusNotFound)
 }
 func run() error {
 
 	r := chi.NewRouter()
 	// ОТВЕТЫ
 	r.HandleFunc("/*", pathHandler)
-	r.Post("/answers", HandleCreateAnswers)
+	r.Post("/answers/create", HandleCreateAnswers)
 	// ОПРОСЫ
 
 	r.Get("/info", infoHandler)
-	r.Get("/admin/create", CreateAdminHandler)
-	r.Get("/admin/login", LoginHandler)
+	r.Post("/admin/create", CreateAdminHandler)
+	r.Post("/admin/login", LoginHandler)
 
 	r.Get("/admin/poll", HandleGetAllPolls)
-	r.Post("/admin/poll", HandleCreatePoll)
+	r.Post("/admin/poll/create", HandleCreatePoll)
 	r.Put("/admin/poll/*", HandleUpdatePoll)
 	r.Delete("/admin/poll/*", HandleDeletePoll)
 
@@ -55,18 +57,18 @@ func run() error {
 	fmt.Println("Образцы вопросов:")
 
 	fmt.Println("Выбор одного из ответов:")
-	utils.LogJsonLight(model.SelectExample)
+	LogJsonLight(model.SelectExample)
 	fmt.Println("Выбор нескольких ответов:")
 
-	utils.LogJsonLight(model.MultiSelectExample)
+	LogJsonLight(model.MultiSelectExample)
 
 	fmt.Println("Текстовая форма:")
 
-	utils.LogJsonLight(model.TextExample)
+	LogJsonLight(model.TextExample)
 
 	fmt.Println("Сетка вопросов:")
 
-	utils.LogJsonLight(model.GridExample)
+	LogJsonLight(model.GridExample)
 
 	err := http.ListenAndServe(":3000", r)
 	if err != nil {

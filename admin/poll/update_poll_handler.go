@@ -29,17 +29,17 @@ func HandleUpdatePoll(rw http.ResponseWriter, req *http.Request) {
 
 	c, e := req.Cookie("sessionId")
 	if e != nil {
+		rw.Write([]byte("Error getting cookie"))
 		rw.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-
+	fmt.Println("Link:", link)
+	fmt.Println("Session:", c.Value)
 	res, err := db.UpdatePoll(link, p, c.Value)
 
 	if err != nil {
-		if err.Error() == "Unauthorized" {
-			rw.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 
 		fmt.Println("Не удалось обновить запрос: ", err)
 

@@ -64,5 +64,4 @@ func HandleCreateAnswers(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 	fmt.Println("Проверка типов ответов пройдена")
-
 }

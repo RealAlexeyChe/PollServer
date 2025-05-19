@@ -2,13 +2,17 @@ package poll
 
 import (
 	"LesyaBack/db"
+	. "LesyaBack/utils"
 	"fmt"
+
 	"net/http"
 	"strings"
 )
 
 func HandleDeletePoll(rw http.ResponseWriter, req *http.Request) {
+
 	fmt.Println("Запрос DELETE на /admin/poll")
+	LogJsonRecieved(req.Body)
 
 	link := strings.Replace(req.URL.Path, "/admin/poll/", "", 1)
 	link = link
@@ -20,6 +24,7 @@ func HandleDeletePoll(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	err := db.DeletePoll(link, c.Value)
+
 	if err != nil {
 		if err.Error() == "Not found" {
 			fmt.Println("Опрос по ссылке не найден")
