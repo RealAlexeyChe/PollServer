@@ -268,11 +268,14 @@ func UpdatePoll(l string, new Poll, sessionId string) (*Poll, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	p.Questions = new.Questions
+
 	if p.SessionId != sessionId {
 		return nil, errors.New("Unauthorized")
 	}
 	_, err = PollCol.UpdateOne(context.TODO(), &bson.M{
-		"link": l}, &bson.M{"$set": new})
+		"link": l}, &bson.M{"$set": p})
 
 	if err != nil {
 		return nil, err
