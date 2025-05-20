@@ -41,11 +41,33 @@ func HandleGetAllPolls(rw http.ResponseWriter, req *http.Request) {
 	rw.Write(res)
 }
 
-func HandleGetPoll(rw http.ResponseWriter, req *http.Request) {
+func HandleGetPollAsAdmin(rw http.ResponseWriter, req *http.Request) {
 
 	link := strings.Replace(req.URL.Path, "/admin/poll/", "", 1)
 
 	fmt.Println("Запрос GET на /admin/poll/", link)
+	LogJsonRecieved(req.Body)
+	res, err := db.GetPoll(link)
+	if err != nil {
+		fmt.Println("Опрос не найден")
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+	p, err := json.Marshal(res)
+	if err != nil {
+		fmt.Println("Внутренняя ошибка сервера: ", err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	LogJsonSent(*res)
+	rw.Write(p)
+}
+
+func HandleGetPollAsUser(rw http.ResponseWriter, req *http.Request) {
+
+	link := strings.Replace(req.URL.Path, "/poll/", "", 1)
+
+	fmt.Println("Запрос GET на /poll/", link)
 	LogJsonRecieved(req.Body)
 	res, err := db.GetPoll(link)
 	if err != nil {

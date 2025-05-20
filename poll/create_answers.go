@@ -64,4 +64,15 @@ func HandleCreateAnswers(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 	fmt.Println("Проверка типов ответов пройдена")
+
+	err = db.CreateNewAnswers(&r)
+
+	if err != nil {
+		fmt.Println("Ошибка сохранения")
+		fmt.Println(err)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+	fmt.Println("Ответы сохранены")
+	rw.Write([]byte("Ответы сохранены"))
+	rw.WriteHeader(http.StatusCreated)
 }

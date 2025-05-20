@@ -45,13 +45,19 @@ func run() error {
 	r.Get("/info", infoHandler)
 	r.Post("/admin/create", CreateAdminHandler)
 	r.Post("/admin/login", LoginHandler)
+	r.Post("/admin/logout", LogoutHandler)
 
 	r.Get("/admin/poll", HandleGetAllPolls)
 	r.Post("/admin/poll/create", HandleCreatePoll)
 	r.Put("/admin/poll/*", HandleUpdatePoll)
 	r.Delete("/admin/poll/*", HandleDeletePoll)
 
-	r.Get("/admin/poll/*", HandleGetPoll)
+	//ADD SESSION CHECK
+	r.Get("/admin/poll/*", HandleGetPollAsAdmin)
+	r.Get("/poll/*", HandleGetPollAsUser)
+
+	r.Post("/answers/create", HandleCreateAnswers)
+
 	fmt.Println("Сервер запущен на 3000")
 
 	fmt.Println("Образцы вопросов:")
